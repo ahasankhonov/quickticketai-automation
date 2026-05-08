@@ -41,12 +41,12 @@ export class AdminJobTicketsPage {
   async gotoViaSidebar() {
     await this.page.getByRole('button', { name: 'Job Tickets' }).click();
     await expect(this.page).toHaveURL(/\/dashboard\/job-tickets/);
-    await this.page.waitForLoadState('networkidle');
+    await expect(this.getCreateTicketButton()).toBeVisible();
   }
 
   async goto() {
     await this.page.goto('/dashboard/job-tickets');
-    await this.page.waitForLoadState('networkidle');
+    await expect(this.getCreateTicketButton()).toBeVisible();
   }
 
   async verifyLoaded() {
@@ -74,13 +74,15 @@ export class AdminJobTicketsPage {
       await expect(this.page.getByRole('columnheader', { name: 'Technician' })).toBeVisible();
       await expect(this.page.getByRole('columnheader', { name: 'Status' })).toBeVisible();
       await expect(this.page.getByRole('columnheader', { name: 'Time Logged' })).toBeVisible();
+      await expect(this.page.getByRole('columnheader', { name: 'Actions' })).toBeVisible();
     } else {
       await expect(this.page.getByRole('columnheader', { name: 'ID del Ticket' })).toBeVisible();
       await expect(this.page.getByRole('columnheader', { name: /Fecha del Ticket/i }).first()).toBeVisible();
       await expect(this.page.getByRole('columnheader', { name: 'Empresa' })).toBeVisible();
       await expect(this.page.getByRole('columnheader', { name: 'Técnico' })).toBeVisible();
       await expect(this.page.getByRole('columnheader', { name: 'Estado' })).toBeVisible();
-      await expect(this.page.getByRole('columnheader', { name: /Tiempo/i })).toBeVisible();
+      await expect(this.page.getByRole('columnheader', { name: 'Tiempo Registrado' })).toBeVisible();
+      await expect(this.page.getByRole('columnheader', { name: 'Acciones' })).toBeVisible();
     }
   }
 
@@ -99,10 +101,12 @@ export class AdminJobTicketsPage {
 
   // ── Template creation (within Create Job Ticket form) ─────────────────────
 
-  // Creates a template using the inline "New template" button on the create form.
+  // Creates a template using the inline textbox + "Add new template" button flow.
   // Adds one checkbox field so the template is valid.
   async createTemplate(details: TemplateDetails) {
-    await this.page.getByRole('button', { name: 'New template' }).click();
+    const templateInput = this.page.getByRole('textbox', { name: 'Select template...' });
+    await templateInput.fill(details.nameEn);
+    await this.page.getByRole('button', { name: `Add new template "${details.nameEn}"` }).click();
     await this.page.getByRole('textbox', { name: 'Enter template name' }).first().fill(details.nameEn);
     if (details.nameEs) {
       await this.page.getByRole('textbox', { name: 'Enter template name' }).nth(1).fill(details.nameEs);
@@ -115,8 +119,9 @@ export class AdminJobTicketsPage {
     await this.page.getByRole('button', { name: 'Create' }).click();
   }
 
-  async selectTicketType(name: string) {
-    await this.page.getByRole('combobox', { name: 'Select ticket type...' }).click();
+  async selectTemplate(name: string) {
+    const templateInput = this.page.getByRole('textbox', { name: 'Select template...' });
+    await templateInput.fill(name);
     await this.page.getByRole('option', { name }).click();
   }
 
@@ -128,13 +133,21 @@ export class AdminJobTicketsPage {
 
   async fillCustomerName(name: string) {
     await this.page.getByRole('textbox', { name: 'Enter customer company name' }).fill(name);
-    // Click the field label to dismiss the autocomplete dropdown without closing any dialogs
-    await this.page.getByText('Customer company name', { exact: false }).first().click();
+    const addCompanyBtn = this.page.getByRole('button', { name: `Add new company "${name}"` });
+    try {
+      await addCompanyBtn.waitFor({ state: 'visible', timeout: 3000 });
+      await addCompanyBtn.click();
+      await this.page.getByRole('button', { name: 'Add Customer' }).click();
+    } catch {
+      // Name already exists — click the first autocomplete suggestion
+      await this.page.getByRole('option').first().click();
+    }
   }
 
   // Invites a new technician inline, with role + level + rate sheet creation.
   async inviteTechnician(tech: TechInviteDetails) {
-    await this.page.getByRole('button', { name: 'Invite technician' }).click();
+    await this.page.getByRole('button', { name: 'Invite New Technician' }).click();
+    await this.page.getByRole('button', { name: 'Create profile' }).click();
     await this.page.getByRole('textbox', { name: 'Type name here...' }).fill(tech.name);
     await this.page.getByRole('textbox', { name: 'Type email here...' }).fill(tech.email);
     // Phone is required — use provided value or a unique default derived from current timestamp
@@ -170,9 +183,12 @@ export class AdminJobTicketsPage {
   // Call right after inviteTechnician (when only the ticket-level dropdown is present)
   // or right after addTool (when only the tool-row dropdown remains).
   async assignTechnicianToDropdown(techName: string) {
-    await this.page.locator('div').filter({ hasText: /^Select options\.\.\.$/ }).first().click();
+    const selectDiv = this.page.locator('div').filter({ hasText: /^Select options\.\.\.$/ }).first();
+    // Skip if already assigned (tool row may auto-populate from the ticket-level selection)
+    if (!await selectDiv.isVisible()) return;
+    await selectDiv.click();
     await this.page.getByRole('button', { name: techName }).first().click();
-    // Close the dropdown by pressing Escape so it doesn't block subsequent form interactions
+    // Close the dropdown so it doesn't block subsequent form interactions
     await this.page.keyboard.press('Escape');
   }
 

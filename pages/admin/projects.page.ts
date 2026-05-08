@@ -9,12 +9,12 @@ export class AdminProjectsPage {
   async gotoViaSidebar() {
     await this.page.getByRole('button', { name: /^Projects$|^Proyectos$/ }).click();
     await expect(this.page).toHaveURL(/\/dashboard\/projects/);
-    await this.page.waitForLoadState('networkidle');
+    await expect(this.getAddProjectButton()).toBeVisible();
   }
 
   async goto() {
     await this.page.goto('/dashboard/projects');
-    await this.page.waitForLoadState('networkidle');
+    await expect(this.getAddProjectButton()).toBeVisible();
   }
 
   async verifyLoaded() {
@@ -85,7 +85,13 @@ export class AdminProjectsPage {
     await this.getAddProjectButton().click();
     await this.getProjectNameInput().fill(name);
     await this.getProjectCodeInput().fill(code);
-    await this.getSaveButton().click();
+    // The submit button text collides with the page-level "+ Add/Agregar project" button.
+    // Click the LAST matching button in the DOM — portals render dialogs at the end of body.
+    await this.page.evaluate(() => {
+      const all = [...document.querySelectorAll('button')];
+      const submit = all.reverse().find(b => /agregar proyecto|add project/i.test(b.textContent ?? ''));
+      (submit as HTMLElement | undefined)?.click();
+    });
   }
 
   // Each row has a kebab/action-menu button — click it, then choose Edit from the dropdown

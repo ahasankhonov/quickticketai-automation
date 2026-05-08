@@ -7,15 +7,14 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 4 : 8,
 
-  timeout: 60_000,
-  expect: { timeout: 10_000 },
+  timeout: 45_000,
+  expect: { timeout: 15_000 },
 
   use: {
     baseURL: 'https://dev.quickticketai.com',
-    headless: true,             // override with --headed flag or npm run test:headed
-    launchOptions: { slowMo: process.env.CI ? 0 : 800 },
+    headless: true,
     screenshot: 'only-on-failure',
-    video: 'on-first-retry',    // captures video when a test retries (e.g. in CI)
+    video: 'on-first-retry',
     trace: 'on-first-retry',
   },
 
@@ -26,5 +25,5 @@ export default defineConfig({
     },
   ],
 
-  reporter: [['html', { open: 'always' }]],
+  reporter: [['html', { open: process.env.CI ? 'never' : 'always' }]],
 });

@@ -9,7 +9,7 @@ export class AdminOverviewPage {
   // Navigates directly to the Overview dashboard
   async goto() {
     await this.page.goto('/dashboard/overview');
-    await this.page.waitForLoadState('networkidle');
+    await expect(this.page.getByRole('tab', { name: 'Overview' })).toBeVisible();
   }
 
   // Confirms the page loaded by URL and presence of the tab strip

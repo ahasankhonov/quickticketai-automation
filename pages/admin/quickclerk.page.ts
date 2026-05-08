@@ -32,14 +32,20 @@ export class AdminQuickClerkPage {
   async startNewChat() {
     const btn = this.page.getByRole('button', { name: 'New Chat' });
     if (await btn.isDisabled()) {
-      const historyItems = this.page.getByRole('button', { name: /^Chat - \d+/i });
+      // Wait briefly to see if we're in a blank new chat (button disabled because no msgs sent).
+      // If so, the UI goal is already met — no need to click New Chat.
+      try {
+        await expect(this.page.getByText('Ask our AI anything')).toBeVisible({ timeout: 3_000 });
+        return;
+      } catch { /* not in new-chat state, fall through */ }
+      // Otherwise in an existing chat — click a history entry to re-enable New Chat
+      const historyItems = this.page.getByRole('button', { name: /^Chat - /i });
       if (await historyItems.count() > 0) {
-        // Load an existing chat to re-activate the New Chat button
         await historyItems.last().click();
       } else {
-        // No history at all — send a message to create the first session
-        await this.page.getByRole('textbox', { name: 'Ask a question...' }).click();
-        await this.page.getByRole('button').filter({ hasText: /^$/ }).nth(3).click();
+        const textbox = this.page.getByRole('textbox', { name: 'Ask a question...' });
+        await textbox.fill('Hello');
+        await textbox.press('Enter');
       }
       await expect(btn).toBeEnabled({ timeout: 15_000 });
     }

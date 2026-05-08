@@ -5,6 +5,10 @@ import { AdminProjectsPage } from '../../pages/admin/projects.page';
 const ADMIN_EMAIL = 'coxav22257@inreur.com';
 const ADMIN_PASSWORD = 'qwerty123';
 
+// Unique suffix per run — prevents project-code unique-constraint errors when a prior run left
+// test projects behind (e.g. test suite failed before the delete step).
+const RUN_ID = Date.now().toString().slice(-6);
+
 test.describe.serial('Admin — Projects', () => {
   let page: Page;
   let projectsPage: AdminProjectsPage;
@@ -72,7 +76,7 @@ test.describe.serial('Admin — Projects', () => {
 
   test('should add a project in Español and show the Spanish success toast', async () => {
     await projectsPage.changeLanguage('Español');
-    await projectsPage.addProject('testaa', 'teatss');
+    await projectsPage.addProject(`testaa-${RUN_ID}`, `tes${RUN_ID}`);
     await projectsPage.verifyAddSuccess('es');
   });
 
@@ -80,7 +84,7 @@ test.describe.serial('Admin — Projects', () => {
 
   test('should switch back to English and add a project', async () => {
     await projectsPage.changeLanguage('English US');
-    await projectsPage.addProject('123', '123');
+    await projectsPage.addProject(`eng-${RUN_ID}`, `eng${RUN_ID}`);
     await projectsPage.verifyAddSuccess('en');
   });
 

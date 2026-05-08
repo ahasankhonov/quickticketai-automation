@@ -26,8 +26,8 @@ test.describe.serial('Admin Job Tickets — Negative & Edge Cases', () => {
 
   test('should open the Create Job Ticket form and show the ticket type selector', async () => {
     await jobTicketsPage.clickCreateTicket();
-    // Ticket type combobox must be visible and the form must be in create state
-    await expect(page.getByRole('combobox', { name: 'Select ticket type...' })).toBeVisible();
+    // Template textbox must be visible and the form must be in create state
+    await expect(page.getByRole('textbox', { name: 'Select template...' })).toBeVisible();
     await page.goto('/dashboard/job-tickets');
     await jobTicketsPage.verifyLoaded();
   });
@@ -41,8 +41,8 @@ test.describe.serial('Admin Job Tickets — Negative & Edge Cases', () => {
 
     await jobTicketsPage.clickCreateTicket();
     // Select an existing template first so the customer field is visible
-    const combobox = page.getByRole('combobox', { name: 'Select ticket type...' });
-    await combobox.click();
+    const templateInput = page.getByRole('textbox', { name: 'Select template...' });
+    await templateInput.click();
     const options = page.getByRole('option');
     const count = await options.count();
     if (count > 0) {
@@ -60,8 +60,8 @@ test.describe.serial('Admin Job Tickets — Negative & Edge Cases', () => {
 
   test('should handle an excessively long customer name without crashing', async () => {
     await jobTicketsPage.clickCreateTicket();
-    const combobox = page.getByRole('combobox', { name: 'Select ticket type...' });
-    await combobox.click();
+    const templateInput = page.getByRole('textbox', { name: 'Select template...' });
+    await templateInput.click();
     const options = page.getByRole('option');
     if (await options.count() > 0) {
       await options.first().click();

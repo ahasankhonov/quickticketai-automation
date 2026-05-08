@@ -71,17 +71,17 @@ test.describe.serial('Admin — Job Tickets', () => {
 
   test('should open the Create Job Ticket form', async () => {
     await jobTicketsPage.clickCreateTicket();
-    await expect(page.getByRole('combobox', { name: 'Select ticket type...' })).toBeVisible();
+    await expect(page.getByRole('textbox', { name: 'Select template...' })).toBeVisible();
   });
 
   test('should create a new template within the form', async () => {
     await jobTicketsPage.createTemplate({ nameEn: templateName, nameEs: `${templateName}-es` });
-    // After creating, the form remains open — verify the template can be selected
-    await expect(page.getByRole('combobox', { name: 'Select ticket type...' })).toBeVisible();
+    // After creating, the form remains open — verify the template selector is still visible
+    await expect(page.getByRole('textbox', { name: 'Select template...' })).toBeVisible();
   });
 
   test('should select the new template as ticket type', async () => {
-    await jobTicketsPage.selectTicketType(templateName);
+    await jobTicketsPage.selectTemplate(templateName);
     await expect(page.getByRole('textbox', { name: 'Enter customer company name' })).toBeVisible();
   });
 
@@ -100,7 +100,7 @@ test.describe.serial('Admin — Job Tickets', () => {
       revenueRate:    1,
       technicianRate: 1,
     });
-    // After invite, the "Invite technician" button should still be present (form stays open)
+    // After invite, the "Invite New Technician" button should still be present (form stays open)
     // and the Line Items section below should now be visible
     await expect(page.getByRole('button', { name: 'Add Part' })).toBeVisible({ timeout: 8000 });
   });

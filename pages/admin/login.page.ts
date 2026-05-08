@@ -6,7 +6,6 @@ export class AdminLoginPage {
   // Navigates to the login page (uses baseURL from playwright.config.ts)
   async gotoLogin() {
     await this.page.goto('/login');
-    await this.page.waitForLoadState('networkidle');
   }
 
   // Happy-path login — fills credentials and asserts the URL leaves /login
@@ -15,7 +14,6 @@ export class AdminLoginPage {
     await this.page.getByRole('textbox', { name: 'Password *' }).fill(password);
     await this.page.getByRole('button', { name: 'Sign In' }).click();
     await expect(this.page).not.toHaveURL(/\/login/);
-    await this.page.waitForLoadState('networkidle');
   }
 
   // Fills and submits the form WITHOUT asserting the outcome — use for negative tests.

@@ -28,12 +28,12 @@ export class AdminInvoicesPage {
   async gotoViaSidebar() {
     await this.page.getByRole('button', { name: /^Invoices$|^Facturas$/ }).click();
     await expect(this.page).toHaveURL(/\/dashboard\/invoices/);
-    await this.page.waitForLoadState('networkidle');
+    await expect(this.getCreateInvoiceButton()).toBeVisible();
   }
 
   async goto() {
     await this.page.goto('/dashboard/invoices');
-    await this.page.waitForLoadState('networkidle');
+    await expect(this.getCreateInvoiceButton()).toBeVisible();
   }
 
   async verifyLoaded() {
