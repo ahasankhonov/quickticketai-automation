@@ -1,11 +1,7 @@
 import { test, expect, Page } from '@playwright/test';
-import { AdminLoginPage } from '../../pages/admin/login.page';
 import { AdminOverviewPage } from '../../pages/admin/overview.page';
 import { AdminQuickClerkPage } from '../../pages/admin/quickclerk.page';
-
-// TODO: move to environment variables (process.env.ADMIN_EMAIL / ADMIN_PASSWORD)
-const ADMIN_EMAIL = 'coxav22257@inreur.com';
-const ADMIN_PASSWORD = 'qwerty123';
+import { createAdminContext } from '../../support/setup';
 
 // serial: tests share one browser session and run in order
 test.describe.serial('Admin — Overview Dashboard', () => {
@@ -13,14 +9,10 @@ test.describe.serial('Admin — Overview Dashboard', () => {
   let overviewPage: AdminOverviewPage;
   let quickClerkPage: AdminQuickClerkPage;
 
-  // Log in once — all tests below reuse this session
   test.beforeAll(async ({ browser }) => {
-    page = await browser.newPage();
-    const loginPage = new AdminLoginPage(page);
+    ({ page } = await createAdminContext(browser));
     overviewPage = new AdminOverviewPage(page);
     quickClerkPage = new AdminQuickClerkPage(page);
-    await loginPage.gotoLogin();
-    await loginPage.login(ADMIN_EMAIL, ADMIN_PASSWORD);
   });
 
   test.afterAll(async () => {

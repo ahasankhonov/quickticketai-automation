@@ -1,6 +1,5 @@
-import { Page, expect, Locator } from '@playwright/test';
-
-type Lang = 'English US' | 'Español';
+import { expect, Locator } from '@playwright/test';
+import { BasePage } from './base.page';
 
 export interface InvoiceDetails {
   projectId: string;
@@ -16,14 +15,13 @@ export interface PartDetails {
   name: string;
   unit: string;
   quantity: number;
-  price: number;      // selling price (first 0.00 field)
-  cost?: number;      // internal cost (second 0.00 field) — defaults to 0
+  price: number;
+  cost?: number;
   lineItemQty?: number;
   description?: string;
 }
 
-export class AdminInvoicesPage {
-  constructor(private page: Page) {}
+export class AdminInvoicesPage extends BasePage {
 
   async gotoViaSidebar() {
     await this.page.getByRole('button', { name: /^Invoices$|^Facturas$/ }).click();
@@ -71,30 +69,12 @@ export class AdminInvoicesPage {
     }
   }
 
-  async changeLanguage(to: Lang) {
-    const from: Lang = to === 'English US' ? 'Español' : 'English US';
-    const fromButton = this.page.getByRole('button', { name: new RegExp(from) }).first();
-    try {
-      await fromButton.waitFor({ state: 'visible', timeout: 3000 });
-    } catch {
-      return;
-    }
-    await fromButton.click();
-    await this.page.getByRole('menuitem', { name: new RegExp(to) }).click();
-    await expect(this.page.getByRole('button', { name: new RegExp(to) }).first()).toBeVisible();
-  }
-
   async openFilters() {
     await this.page.getByRole('button', { name: /Filters|Filtros/i }).click();
   }
 
   async applyFilters() {
     await this.page.getByRole('button', { name: /Apply Filter/i }).click();
-  }
-
-  async changePageSize(size: number) {
-    await this.page.getByRole('combobox').click();
-    await this.page.getByRole('option', { name: String(size) }).click();
   }
 
   // ── Invoice creation ───────────────────────────────────────────────────────
@@ -105,11 +85,8 @@ export class AdminInvoicesPage {
 
   async fillInvoiceDetails(details: InvoiceDetails) {
     await this.page.getByRole('textbox', { name: 'Enter project ID' }).fill(details.projectId);
-
-    // Open the date picker and pick today
     await this.page.locator('div').filter({ hasText: /^Select Date$/ }).click();
     await this.page.getByRole('button', { name: /Today/i }).first().click();
-
     if (details.poNumber !== undefined) {
       await this.page.getByRole('textbox', { name: 'Enter PO/AFE number' }).fill(details.poNumber);
     }
@@ -130,20 +107,16 @@ export class AdminInvoicesPage {
     }
   }
 
-  // Opens Add Job Ticket dialog, selects first available ticket, and applies.
-  // If no tickets exist the dialog closes with nothing selected.
   async addJobTickets() {
     await this.page.getByRole('button', { name: 'Add Items' }).click();
     await this.page.getByRole('button', { name: /Add Job/i }).click();
     const dataRows = this.page.getByRole('row').filter({ hasNot: this.page.getByRole('columnheader') });
-    const count = await dataRows.count();
-    if (count > 0) {
+    if (await dataRows.count() > 0) {
       await dataRows.first().getByRole('checkbox').check();
     }
     await this.page.getByRole('button', { name: 'Apply' }).click();
   }
 
-  // Opens Add Job Ticket dialog, searches for a term, then cancels.
   async searchAndCancelJobTickets(searchTerm: string) {
     await this.page.getByRole('button', { name: 'Add Items' }).click();
     await this.page.getByRole('button', { name: /Add Job/i }).click();
@@ -151,28 +124,20 @@ export class AdminInvoicesPage {
     await this.page.getByRole('button', { name: 'Cancel' }).last().click();
   }
 
-  // Opens Add Part dialog, creates a new part if not found, fills details, and adds it.
   async addPart(part: PartDetails) {
     await this.page.getByRole('button', { name: 'Add Items' }).click();
     await this.page.getByRole('button', { name: /Parts.*Materials/i }).click();
-
     const searchInput = this.page.getByRole('textbox', { name: /Search Inventory/i }).last();
     await searchInput.fill(part.name);
-
-    // Wait for search results — either a "Create new part" button or an existing-part button
-    const createBtn  = this.page.getByRole('button', { name: new RegExp(`Create new part "${part.name}"`) });
-    const existingBtn = this.page.getByRole('button', { name: new RegExp(`${part.name}`) }).first();
+    const createBtn = this.page.getByRole('button', { name: new RegExp(`Create new part "${part.name}"`) });
+    const existingBtn = this.page.getByRole('button', { name: new RegExp(part.name) }).first();
     try {
       await createBtn.waitFor({ state: 'visible', timeout: 5000 });
       await createBtn.click();
     } catch {
-      // Part exists in inventory — click the search result to open its edit form
       await existingBtn.click();
     }
-
-    // After selecting/creating a part the "Add Part" dialog shows the detail form
     const dialog = this.page.getByRole('dialog', { name: 'Add Part' });
-    // Unit field matches by placeholder since it has no separate label
     await this.page.getByRole('textbox', { name: 'e.g. pcs, ft, box' }).fill(part.unit);
     await dialog.getByPlaceholder('0', { exact: true }).fill(String(part.quantity));
     await this.page.getByPlaceholder('0.00').first().fill(String(part.price));
@@ -181,15 +146,12 @@ export class AdminInvoicesPage {
       await this.page.getByRole('textbox', { name: /Add a description/i }).fill(part.description);
     }
     await dialog.getByRole('button', { name: 'Add' }).click();
-
-    // After the dialog closes, update this line item's quantity on the invoice form
     if (part.lineItemQty !== undefined) {
       await this.page.getByRole('textbox', { name: 'Enter', exact: true }).last()
         .fill(String(part.lineItemQty));
     }
   }
 
-  // Opens the Submit Invoice modal, fills email + discount, and submits.
   async submitInvoice(email: string, discount: number) {
     await this.getSubmitInvoiceButton().click();
     await this.page.getByRole('textbox', { name: 'Type email here...' }).fill(email);
@@ -197,28 +159,18 @@ export class AdminInvoicesPage {
     await this.page.getByRole('button', { name: 'Submit', exact: true }).click();
   }
 
-  // Some submit flows (invoice missing required items) trigger a "Don't Save" prompt.
-  // Clicking it cancels the submit and keeps the user on the create form to continue editing.
   async dismissSavePromptIfPresent() {
     const btn = this.page.getByRole('button', { name: "Don't Save" });
     try {
       await btn.waitFor({ state: 'visible', timeout: 2000 });
       await btn.click();
-    } catch {
-      // No prompt appeared — submission likely succeeded
-    }
+    } catch { /* no prompt */ }
   }
 
-  // Verifies a submitted invoice exists in the list — more reliable than a short-lived toast.
   async verifyInvoiceSubmitted() {
     await expect(
       this.page.getByRole('row').filter({ hasText: /Submitted/i }).first()
     ).toBeVisible({ timeout: 10000 });
-  }
-
-  async openRowMenu(rowIndex: number) {
-    const rows = this.page.getByRole('row').filter({ hasNot: this.page.getByRole('columnheader') });
-    await rows.nth(rowIndex).getByRole('button').last().click();
   }
 
   // ── Locators ───────────────────────────────────────────────────────────────

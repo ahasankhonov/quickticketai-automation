@@ -1,10 +1,9 @@
-import { Page, expect, Locator } from '@playwright/test';
+import { expect, Locator } from '@playwright/test';
+import { BasePage } from './base.page';
 
-type Lang = 'English US' | 'Español';
 type View = 'Card' | 'Table';
 
-export class AdminProjectsPage {
-  constructor(private page: Page) {}
+export class AdminProjectsPage extends BasePage {
 
   async gotoViaSidebar() {
     await this.page.getByRole('button', { name: /^Projects$|^Proyectos$/ }).click();
@@ -41,38 +40,10 @@ export class AdminProjectsPage {
     await expect(this.page.getByRole('columnheader', { name: /Created By|Creado por/i })).toBeVisible();
   }
 
-  // View radio names translate with the language (Card → Vista de tarjetas, Table → Vista de tabla)
   async switchView(view: View) {
-    const namePattern = view === 'Card'
-      ? /card|vista de tarjetas/i
-      : /table|vista de tabla/i;
-    await this.page.getByRole('radio', { name: namePattern }).click();
-    await expect(this.page.getByRole('radio', { name: namePattern })).toBeChecked();
-  }
-
-  async changeLanguage(to: Lang) {
-    const from: Lang = to === 'English US' ? 'Español' : 'English US';
-    const fromButton = this.page.getByRole('button', { name: new RegExp(from) }).first();
-    // Already in target language — nothing to do
-    try {
-      await fromButton.waitFor({ state: 'visible', timeout: 3000 });
-    } catch {
-      return;
-    }
-    await fromButton.click();
-    await this.page.getByRole('menuitem', { name: new RegExp(to) }).click();
-    // Confirm the switch took effect before continuing
-    await expect(this.page.getByRole('button', { name: new RegExp(to) }).first()).toBeVisible();
-  }
-
-  async changePageSize(size: number) {
-    const combobox = this.page.getByRole('combobox').first();
-    const isVisible = await combobox.isVisible();
-    if (!isVisible) {
-      return; // pagination control absent when there are no rows
-    }
-    await combobox.click();
-    await this.page.getByRole('option', { name: String(size) }).click();
+    const pattern = view === 'Card' ? /card|vista de tarjetas/i : /table|vista de tabla/i;
+    await this.page.getByRole('radio', { name: pattern }).click();
+    await expect(this.page.getByRole('radio', { name: pattern })).toBeChecked();
   }
 
   async verifyProjectInList(name: string) {
@@ -85,27 +56,22 @@ export class AdminProjectsPage {
     await this.getAddProjectButton().click();
     await this.getProjectNameInput().fill(name);
     await this.getProjectCodeInput().fill(code);
-    // The submit button text collides with the page-level "+ Add/Agregar project" button.
-    // Click the LAST matching button in the DOM — portals render dialogs at the end of body.
-    await this.page.evaluate(() => {
-      const all = [...document.querySelectorAll('button')];
-      const submit = all.reverse().find(b => /agregar proyecto|add project/i.test(b.textContent ?? ''));
-      (submit as HTMLElement | undefined)?.click();
-    });
+    // The dialog's submit button shares the same name as the page-level add button;
+    // the dialog always renders last in the DOM — dispatchEvent bypasses any overlay.
+    const submitBtn = this.page.getByRole('button', { name: /add project|agregar proyecto/i }).last();
+    await submitBtn.scrollIntoViewIfNeeded();
+    await submitBtn.dispatchEvent('click');
   }
 
-  // Each row has a kebab/action-menu button — click it, then choose Edit from the dropdown
   async editProject(rowIndex: number, newName: string) {
     const rows = this.page.getByRole('row').filter({ hasNot: this.page.getByRole('columnheader') });
     await rows.nth(rowIndex).getByRole('button').last().click();
     await this.page.getByRole('menuitem', { name: /edit|editar/i }).click();
-    const nameInput = this.getProjectNameInput();
-    await nameInput.clear();
-    await nameInput.fill(newName);
+    await this.getProjectNameInput().clear();
+    await this.getProjectNameInput().fill(newName);
     await this.getSaveButton().click();
   }
 
-  // Each row has a kebab/action-menu button — click it, then choose Delete from the dropdown
   async deleteProject(rowIndex: number, confirm: boolean) {
     const rows = this.page.getByRole('row').filter({ hasNot: this.page.getByRole('columnheader') });
     await rows.nth(rowIndex).getByRole('button').last().click();
@@ -123,14 +89,14 @@ export class AdminProjectsPage {
   }
 
   async verifyUpdateSuccess() {
-    await expect(this.page.getByText('Project updated successfully').first()).toBeVisible();
+    await this.verifyToast(/Project updated successfully/);
   }
 
   async verifyDeleteSuccess() {
-    await expect(this.page.getByText('Project deleted successfully').first()).toBeVisible();
+    await this.verifyToast(/Project deleted successfully/);
   }
 
-  // Locators — language-agnostic where the UI translates
+  // ── Locators ───────────────────────────────────────────────────────────────
 
   getAddProjectButton(): Locator {
     return this.page.getByRole('button', { name: /add project|agregar proyecto/i });

@@ -1,6 +1,5 @@
-import { Page, expect, Locator } from '@playwright/test';
-
-type Lang = 'English US' | 'Español';
+import { expect, Locator } from '@playwright/test';
+import { BasePage } from './base.page';
 
 export interface TemplateDetails {
   nameEn: string;
@@ -18,7 +17,6 @@ export interface TechInviteDetails {
   technicianRate?: number;
 }
 
-
 export interface PartDetails {
   name: string;
   unit: string;
@@ -35,8 +33,7 @@ export interface ToolDetails {
   description?: string;
 }
 
-export class AdminJobTicketsPage {
-  constructor(private page: Page) {}
+export class AdminJobTicketsPage extends BasePage {
 
   async gotoViaSidebar() {
     await this.page.getByRole('button', { name: 'Job Tickets' }).click();
@@ -86,23 +83,8 @@ export class AdminJobTicketsPage {
     }
   }
 
-  async changeLanguage(to: Lang) {
-    const from: Lang = to === 'English US' ? 'Español' : 'English US';
-    const fromButton = this.page.getByRole('button', { name: new RegExp(from) }).first();
-    try {
-      await fromButton.waitFor({ state: 'visible', timeout: 3000 });
-    } catch {
-      return;
-    }
-    await fromButton.click();
-    await this.page.getByRole('menuitem', { name: new RegExp(to) }).click();
-    await expect(this.page.getByRole('button', { name: new RegExp(to) }).first()).toBeVisible();
-  }
-
   // ── Template creation (within Create Job Ticket form) ─────────────────────
 
-  // Creates a template using the inline textbox + "Add new template" button flow.
-  // Adds one checkbox field so the template is valid.
   async createTemplate(details: TemplateDetails) {
     const templateInput = this.page.getByRole('textbox', { name: 'Select template...' });
     await templateInput.fill(details.nameEn);
@@ -111,7 +93,6 @@ export class AdminJobTicketsPage {
     if (details.nameEs) {
       await this.page.getByRole('textbox', { name: 'Enter template name' }).nth(1).fill(details.nameEs);
     }
-    // Add one checkbox field so the template has at least one field
     await this.page.getByRole('button', { name: 'Add Field' }).click();
     await this.page.getByRole('button', { name: 'Text' }).click();
     await this.page.getByRole('menuitem', { name: 'Checkbox' }).click();
@@ -139,36 +120,32 @@ export class AdminJobTicketsPage {
       await addCompanyBtn.click();
       await this.page.getByRole('button', { name: 'Add Customer' }).click();
     } catch {
-      // Name already exists — click the first autocomplete suggestion
       await this.page.getByRole('option').first().click();
     }
   }
 
-  // Invites a new technician inline, with role + level + rate sheet creation.
   async inviteTechnician(tech: TechInviteDetails) {
     await this.page.getByRole('button', { name: 'Invite New Technician' }).click();
     await this.page.getByRole('button', { name: 'Create profile' }).click();
     await this.page.getByRole('textbox', { name: 'Type name here...' }).fill(tech.name);
     await this.page.getByRole('textbox', { name: 'Type email here...' }).fill(tech.email);
-    // Phone is required — use provided value or a unique default derived from current timestamp
-    await this.page.getByRole('textbox', { name: '(234) 567-' }).fill(tech.phone ?? String(Date.now()).slice(-10));
+    const phoneField = this.page.getByRole('textbox', { name: /\(234\)|phone/i });
+    await phoneField.click();
+    await phoneField.pressSequentially(tech.phone ?? this.validPhone());
     await this.page.getByRole('textbox', { name: 'Type password here...' }).fill(tech.password);
 
-    // Create and select role — use .last() because the tech name field shares the same label
     await this.page.getByRole('button', { name: 'New role' }).click();
     await this.page.getByRole('textbox', { name: 'Type name here...' }).last().fill(tech.role);
     await this.page.getByRole('button', { name: 'Add Technician Role' }).click();
     await this.page.getByRole('button', { name: 'Choose technician role' }).click();
     await this.page.getByRole('menuitem', { name: tech.role }).click();
 
-    // Create and select level
     await this.page.getByRole('button', { name: 'New level' }).click();
     await this.page.getByRole('textbox', { name: 'Type name here...' }).last().fill(tech.level);
     await this.page.getByRole('button', { name: 'Add Technician Level' }).click();
     await this.page.getByRole('button', { name: 'Choose technician level' }).click();
     await this.page.getByRole('menuitem', { name: tech.level }).click();
 
-    // Add invite-level rate sheet
     await this.page.getByRole('button', { name: 'New rate sheet' }).click();
     await this.page.getByPlaceholder('Type rate sheet here...').fill(String(tech.revenueRate ?? 1));
     await this.page.getByPlaceholder('Type technician rate here...').fill(String(tech.technicianRate ?? 1));
@@ -177,18 +154,11 @@ export class AdminJobTicketsPage {
     await this.page.getByRole('button', { name: 'Invite Technician' }).click();
   }
 
-
-  // Assigns the invited technician to the ticket (the Select options... dropdown on the form).
-  // Selects the first visible "Select options..." dropdown and picks the technician.
-  // Call right after inviteTechnician (when only the ticket-level dropdown is present)
-  // or right after addTool (when only the tool-row dropdown remains).
   async assignTechnicianToDropdown(techName: string) {
     const selectDiv = this.page.locator('div').filter({ hasText: /^Select options\.\.\.$/ }).first();
-    // Skip if already assigned (tool row may auto-populate from the ticket-level selection)
     if (!await selectDiv.isVisible()) return;
     await selectDiv.click();
     await this.page.getByRole('button', { name: techName }).first().click();
-    // Close the dropdown so it doesn't block subsequent form interactions
     await this.page.keyboard.press('Escape');
   }
 
@@ -208,7 +178,6 @@ export class AdminJobTicketsPage {
     const dialog = this.page.getByRole('dialog', { name: 'Add Part' });
     await this.page.getByRole('textbox', { name: 'e.g. pcs, ft, box' }).fill(part.unit);
     await dialog.getByPlaceholder('0', { exact: true }).fill(String(part.quantity));
-    // nth(2)/nth(3): ticket form has its own 0.00 fields before the dialog opens
     await this.page.getByPlaceholder('0.00').nth(2).fill(String(part.price));
     if (part.cost !== undefined) {
       await this.page.getByPlaceholder('0.00').nth(3).fill(String(part.cost));
@@ -270,7 +239,8 @@ export class AdminJobTicketsPage {
 
   // ── List actions ───────────────────────────────────────────────────────────
 
-  async openRowMenu(rowIndex: number) {
+  // Override: job-tickets uses a named "Open menu" button, not just the last button in the row
+  override async openRowMenu(rowIndex: number) {
     const rows = this.page.getByRole('row').filter({ hasNot: this.page.getByRole('columnheader') });
     await rows.nth(rowIndex).getByRole('button', { name: /Open menu|Abrir menú/i }).click();
   }

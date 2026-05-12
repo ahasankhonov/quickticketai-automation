@@ -1,9 +1,6 @@
 import { test, expect, Page } from '@playwright/test';
-import { AdminLoginPage } from '../../pages/admin/login.page';
 import { AdminJobTicketsPage } from '../../pages/admin/job-tickets.page';
-
-const ADMIN_EMAIL = 'coxav22257@inreur.com';
-const ADMIN_PASSWORD = 'qwerty123';
+import { createAdminContext } from '../../support/setup';
 
 test.describe.serial('Admin — Job Tickets', () => {
   let page: Page;
@@ -21,11 +18,8 @@ test.describe.serial('Admin — Job Tickets', () => {
   const toolName      = `e2e-tool-${ts}`;
 
   test.beforeAll(async ({ browser }) => {
-    page = await browser.newPage();
-    const loginPage = new AdminLoginPage(page);
+    ({ page } = await createAdminContext(browser));
     jobTicketsPage = new AdminJobTicketsPage(page);
-    await loginPage.gotoLogin();
-    await loginPage.login(ADMIN_EMAIL, ADMIN_PASSWORD);
     await jobTicketsPage.gotoViaSidebar();
   });
 

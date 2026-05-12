@@ -1,20 +1,14 @@
 import { test, expect, Page } from '@playwright/test';
-import { AdminLoginPage } from '../../pages/admin/login.page';
 import { AdminInvoicesPage } from '../../pages/admin/invoices.page';
-
-const ADMIN_EMAIL = 'coxav22257@inreur.com';
-const ADMIN_PASSWORD = 'qwerty123';
+import { createAdminContext } from '../../support/setup';
 
 test.describe.serial('Admin Invoices — Negative & Edge Cases', () => {
   let page: Page;
   let invoicesPage: AdminInvoicesPage;
 
   test.beforeAll(async ({ browser }) => {
-    page = await browser.newPage();
-    const loginPage = new AdminLoginPage(page);
+    ({ page } = await createAdminContext(browser));
     invoicesPage = new AdminInvoicesPage(page);
-    await loginPage.gotoLogin();
-    await loginPage.login(ADMIN_EMAIL, ADMIN_PASSWORD);
     await invoicesPage.gotoViaSidebar();
   });
 
