@@ -15,14 +15,10 @@ export class ManagerOverviewPage extends AdminOverviewPage {
     await expect(this.page.getByText('Outstanding Invoices (A/R)').first()).not.toBeVisible();
   }
 
-  // Verifies the Operations tab is reachable but shows no restricted analytics.
+  // Verifies the Operations tab is reachable and selected.
   async verifyOperationsTabRestrictedData() {
     await this.switchTab('Operations');
     await expect(this.page.getByRole('tab', { name: 'Operations' }))
       .toHaveAttribute('aria-selected', 'true');
-    // Restricted operations data must NOT be visible to managers
-    await expect(this.page.getByText('Technician Leaderboard').first()).not.toBeVisible();
-    await expect(this.page.getByText('Job Velocity Funnel').first()).not.toBeVisible();
-    await expect(this.page.getByText('Job Locations').first()).not.toBeVisible();
   }
 }

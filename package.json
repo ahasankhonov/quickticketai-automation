@@ -5,7 +5,7 @@
   "scripts": {
     "test": "playwright test",
     "test:admin": "playwright test --project=admin --project=admin-login",
-    "test:manager": "playwright test --project=manager",
+    "test:manager": "playwright test --project=manager --project=manager-login",
     "test:headed": "playwright test --headed",
     "test:ci": "CI=true playwright test",
     "test:debug": "playwright test --headed --workers=1",

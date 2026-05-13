@@ -52,12 +52,18 @@ export default defineConfig({
     {
       name: 'manager',
       testDir: './tests/manager',
-      testIgnore: /auth\.setup\.ts/,
+      testIgnore: /auth\.setup\.ts|login\.negative\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'playwright/.auth/manager.json',
       },
       dependencies: ['manager-setup'],
+    },
+    {
+      name: 'manager-login',
+      testDir: './tests/manager',
+      testMatch: /login\.negative\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'] },
     },
   ],
 

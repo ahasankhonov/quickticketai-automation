@@ -92,7 +92,7 @@ export class AdminCompanyPage extends BasePage {
     const input = this.page.getByRole('textbox').first();
     await input.clear();
     await input.fill(newName);
-    await this.page.getByRole('button', { name: /Update/i }).last().click();
+    await this.page.getByRole('button', { name: /Update/i }).last().dispatchEvent('click');
   }
 
   async deleteTechnicianRole(rowIndex: number, confirm: boolean) {
@@ -132,7 +132,7 @@ export class AdminCompanyPage extends BasePage {
     const input = this.page.getByRole('textbox').first();
     await input.clear();
     await input.fill(newName);
-    await this.page.getByRole('button', { name: /Update/i }).last().click();
+    await this.page.getByRole('button', { name: /Update/i }).last().dispatchEvent('click');
   }
 
   async deleteTechnicianLevel(rowIndex: number, confirm: boolean) {

@@ -27,7 +27,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run Manager Tests
-        run: npx playwright test --project=manager --reporter=json,html
+        run: npx playwright test --project=manager --project=manager-login --reporter=json,html
         env:
           CI: true
           PLAYWRIGHT_JSON_OUTPUT_NAME: results.json

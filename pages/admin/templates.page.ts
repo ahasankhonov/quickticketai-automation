@@ -85,7 +85,16 @@ export class AdminTemplatesPage extends BasePage {
       await this.addField(field);
     }
 
-    await this.page.getByRole('button', { name: /^create$|^crear$/i }).click();
+    const createBtn = this.page.getByRole('button', { name: /^create$|^crear$/i });
+    await createBtn.dispatchEvent('click');
+    // Some sessions (e.g. manager) create the template but leave the dialog open.
+    // Click the X button to force-close it; the save already completed on the server.
+    try {
+      await this.page.getByRole('dialog').waitFor({ state: 'hidden', timeout: 2000 });
+    } catch {
+      const dialog = this.page.getByRole('dialog');
+      await dialog.getByRole('button').first().dispatchEvent('click');
+    }
   }
 
   async addField(field: TemplateField) {

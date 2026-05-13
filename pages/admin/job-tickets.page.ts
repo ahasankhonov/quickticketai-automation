@@ -251,7 +251,7 @@ export class AdminJobTicketsPage extends BasePage {
   }
 
   async submitEdit() {
-    await this.page.getByRole('button', { name: /Submit changes|Enviar cambios/i }).click();
+    await this.page.getByRole('button', { name: /Submit changes|Enviar cambios/i }).dispatchEvent('click');
   }
 
   async deleteFirstTicket() {
