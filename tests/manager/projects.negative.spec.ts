@@ -20,20 +20,20 @@ test.describe.serial('Manager Projects — Negative & Edge Cases', () => {
     await projectsPage.getAddProjectButton().click();
     await projectsPage.getProjectCodeInput().fill('MGRVALIDCODE');
     await expect(projectsPage.getSaveButton()).toBeDisabled();
-    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: /^cancel$|^cancelar$/i }).click();
   });
 
   test('should disable Save when project code is empty', async () => {
     await projectsPage.getAddProjectButton().click();
     await projectsPage.getProjectNameInput().fill('Valid Manager Project Name');
     await expect(projectsPage.getSaveButton()).toBeDisabled();
-    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: /^cancel$|^cancelar$/i }).click();
   });
 
   test('should disable Save when both name and code are empty', async () => {
     await projectsPage.getAddProjectButton().click();
     await expect(projectsPage.getSaveButton()).toBeDisabled();
-    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: /^cancel$|^cancelar$/i }).click();
   });
 
   test('should disable Save when project name is whitespace only', async () => {
@@ -41,7 +41,7 @@ test.describe.serial('Manager Projects — Negative & Edge Cases', () => {
     await projectsPage.getProjectNameInput().fill('     ');
     await projectsPage.getProjectCodeInput().fill('MGRVALIDCODE');
     await expect(projectsPage.getSaveButton()).toBeDisabled();
-    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: /^cancel$|^cancelar$/i }).click();
   });
 
   test('should not execute script injected into the project name field', async () => {
@@ -56,12 +56,15 @@ test.describe.serial('Manager Projects — Negative & Edge Cases', () => {
     await projectsPage.getProjectCodeInput().fill('XSSMGR01');
 
     const saveBtn = projectsPage.getSaveButton();
+    const dialogStillOpen = await page.getByRole('dialog').isVisible().catch(() => false);
     if (!await saveBtn.isDisabled()) {
       await saveBtn.click();
     }
 
     expect(dialogTriggered).toBe(false);
-    await page.keyboard.press('Escape');
+    if (await page.getByRole('dialog').isVisible().catch(() => false)) {
+      await page.getByRole('button', { name: /^cancel$|^cancelar$/i }).click();
+    }
   });
 
   test('should handle an excessively long project name without crashing', async () => {
@@ -71,7 +74,7 @@ test.describe.serial('Manager Projects — Negative & Edge Cases', () => {
     await projectsPage.getProjectCodeInput().fill('MGRLNG01');
 
     await expect(page).toHaveURL(/\/dashboard\/projects/);
-    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: /^cancel$|^cancelar$/i }).click();
     await projectsPage.verifyLoaded();
   });
 
@@ -97,7 +100,7 @@ test.describe.serial('Manager Projects — Negative & Edge Cases', () => {
     await page.getByRole('menuitem', { name: /edit|editar/i }).click();
     await projectsPage.getProjectNameInput().clear();
     await expect(projectsPage.getSaveButton()).toBeDisabled();
-    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: /^cancel$|^cancelar$/i }).click();
   });
 
   test('rapid view switching should settle on the last selected view', async () => {

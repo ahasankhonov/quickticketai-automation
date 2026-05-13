@@ -21,24 +21,21 @@ test.describe.serial('Admin Projects — Negative & Edge Cases', () => {
   test('should disable Save when project name is empty', async () => {
     await projectsPage.getAddProjectButton().click();
     await projectsPage.getProjectCodeInput().fill('VALIDCODE');
-    // Name is empty — Save must be disabled
     await expect(projectsPage.getSaveButton()).toBeDisabled();
-    // Dismiss dialog
-    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: /^cancel$|^cancelar$/i }).click();
   });
 
   test('should disable Save when project code is empty', async () => {
     await projectsPage.getAddProjectButton().click();
     await projectsPage.getProjectNameInput().fill('Valid Project Name');
-    // Code is empty — Save must be disabled
     await expect(projectsPage.getSaveButton()).toBeDisabled();
-    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: /^cancel$|^cancelar$/i }).click();
   });
 
   test('should disable Save when both name and code are empty', async () => {
     await projectsPage.getAddProjectButton().click();
     await expect(projectsPage.getSaveButton()).toBeDisabled();
-    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: /^cancel$|^cancelar$/i }).click();
   });
 
   test('should disable Save when project name is whitespace only', async () => {
@@ -46,7 +43,7 @@ test.describe.serial('Admin Projects — Negative & Edge Cases', () => {
     await projectsPage.getProjectNameInput().fill('     ');
     await projectsPage.getProjectCodeInput().fill('VALIDCODE');
     await expect(projectsPage.getSaveButton()).toBeDisabled();
-    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: /^cancel$|^cancelar$/i }).click();
   });
 
   // ── XSS ───────────────────────────────────────────────────────────────────
@@ -68,22 +65,21 @@ test.describe.serial('Admin Projects — Negative & Edge Cases', () => {
     }
 
     expect(dialogTriggered).toBe(false);
-    await page.keyboard.press('Escape');
+    if (await page.getByRole('dialog').isVisible().catch(() => false)) {
+      await page.getByRole('button', { name: /^cancel$|^cancelar$/i }).click();
+    }
   });
 
   // ── Long input ────────────────────────────────────────────────────────────
 
   test('should handle an excessively long project name without crashing', async () => {
-    // 500-char name — tests client-side resilience (no server round-trip needed)
     const longName = 'A'.repeat(500);
     await projectsPage.getAddProjectButton().click();
     await projectsPage.getProjectNameInput().fill(longName);
     await projectsPage.getProjectCodeInput().fill('LONG01');
 
-    // Page URL must still be on projects — app is stable despite the extreme input
     await expect(page).toHaveURL(/\/dashboard\/projects/);
-    // Close without submitting
-    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: /^cancel$|^cancelar$/i }).click();
     await projectsPage.verifyLoaded();
   });
 
@@ -114,7 +110,7 @@ test.describe.serial('Admin Projects — Negative & Edge Cases', () => {
     await page.getByRole('menuitem', { name: /edit|editar/i }).click();
     await projectsPage.getProjectNameInput().clear();
     await expect(projectsPage.getSaveButton()).toBeDisabled();
-    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: /^cancel$|^cancelar$/i }).click();
   });
 
   // ── Rapid view switching ──────────────────────────────────────────────────
