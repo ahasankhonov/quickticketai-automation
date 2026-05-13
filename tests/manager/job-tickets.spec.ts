@@ -124,6 +124,7 @@ test.describe.serial('Manager — Job Tickets', () => {
   test('should update work hours and submit the edit', async () => {
     await page.getByPlaceholder('Enter work hours').fill('1');
     await jobTicketsPage.submitEdit();
+    await jobTicketsPage.goto();
     await jobTicketsPage.verifyLoaded();
   });
 
