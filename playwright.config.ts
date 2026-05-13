@@ -1,7 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -19,28 +18,46 @@ export default defineConfig({
   },
 
   projects: [
-    // Runs once before any test project — saves admin session to disk
+    // ── Admin ──────────────────────────────────────────────────────────────────
+
     {
-      name: 'setup',
+      name: 'admin-setup',
+      testDir: './tests/admin',
       testMatch: /auth\.setup\.ts/,
     },
-
-    // All tests that need auth (everything except login.negative.spec.ts)
     {
-      name: 'chromium',
+      name: 'admin',
+      testDir: './tests/admin',
+      testIgnore: /auth\.setup\.ts|login\.negative\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         storageState: 'playwright/.auth/admin.json',
       },
-      dependencies: ['setup'],
-      testIgnore: /login\.negative\.spec\.ts/,
+      dependencies: ['admin-setup'],
+    },
+    {
+      name: 'admin-login',
+      testDir: './tests/admin',
+      testMatch: /login\.negative\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'] },
     },
 
-    // Login-page tests run unauthenticated, no dependency on setup
+    // ── Manager ────────────────────────────────────────────────────────────────
+
     {
-      name: 'chromium-login',
-      use: { ...devices['Desktop Chrome'] },
-      testMatch: /login\.negative\.spec\.ts/,
+      name: 'manager-setup',
+      testDir: './tests/manager',
+      testMatch: /auth\.setup\.ts/,
+    },
+    {
+      name: 'manager',
+      testDir: './tests/manager',
+      testIgnore: /auth\.setup\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'playwright/.auth/manager.json',
+      },
+      dependencies: ['manager-setup'],
     },
   ],
 

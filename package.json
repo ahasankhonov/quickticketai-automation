@@ -4,6 +4,8 @@
   "description": "Playwright E2E tests for QuickTicketAI",
   "scripts": {
     "test": "playwright test",
+    "test:admin": "playwright test --project=admin --project=admin-login",
+    "test:manager": "playwright test --project=manager",
     "test:headed": "playwright test --headed",
     "test:ci": "CI=true playwright test",
     "test:debug": "playwright test --headed --workers=1",
