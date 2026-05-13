@@ -1,0 +1,51 @@
+name: E2E — Technician
+
+on:
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  technician-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Technician Tests
+        run: npx playwright test --project=technician --project=technician-login --reporter=json,html
+        env:
+          CI: true
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results.json
+
+      - name: Upload Technician Results (for QA Dashboard)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results-technician
+          path: |
+            results.json
+            test-results/
+          retention-days: 30
+
+      - name: Upload Technician HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-technician
+          path: playwright-report/
+          retention-days: 30
