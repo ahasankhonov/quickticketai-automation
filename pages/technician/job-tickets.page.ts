@@ -3,6 +3,11 @@ import { AdminJobTicketsPage, PartDetails, ToolDetails } from '../admin/job-tick
 
 export class TechnicianJobTicketsPage extends AdminJobTicketsPage {
 
+  // Technician has no sidebar — navigate directly to the URL
+  override async gotoViaSidebar(): Promise<void> {
+    await this.page.goto('/dashboard/job-tickets');
+  }
+
   // Technician form is a full page (not a modal) — parts and tools are inline, no dialog wrapper
   override async addPart(part: PartDetails): Promise<void> {
     await this.page.getByRole('button', { name: 'Add Part' }).click();
