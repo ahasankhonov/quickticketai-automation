@@ -4,15 +4,9 @@ import { BasePage } from '../admin/base.page';
 export class TechnicianProfilePage extends BasePage {
 
   async gotoViaSidebar(): Promise<void> {
-    // Technician has no sidebar — profile is the user section in the top-right nav bar
-    // App does not use <header> tag — search page-wide for the role badge
-    const enBadge = this.page.getByText('TECHNICIAN', { exact: true });
-    if (await enBadge.isVisible().catch(() => false)) {
-      await enBadge.click();
-    } else {
-      // Language may be switched — try Spanish equivalent
-      await this.page.getByText(/TÉCNICO/i).first().click();
-    }
+    // Technician has no sidebar — profile is the top-right user card
+    // click() waits for the element, handles both EN and ES
+    await this.page.getByText(/^TECHNICIAN$|^TÉCNICO$/i).first().click();
     await expect(this.page.getByRole('button', { name: /^Edit$|^Editar$/i })).toBeVisible({ timeout: 10000 });
   }
 

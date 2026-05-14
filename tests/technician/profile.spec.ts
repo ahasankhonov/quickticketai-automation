@@ -69,6 +69,7 @@ test.describe.serial('Technician — Profile', () => {
   test('should switch back to English US', async () => {
     await profilePage.cancelEdit();
     await profilePage.changeLanguage('English US');
+    await profilePage.gotoViaSidebar();
     await profilePage.verifyLoaded();
   });
 });
