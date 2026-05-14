@@ -65,6 +65,30 @@ export default defineConfig({
       testMatch: /login\.negative\.spec\.ts/,
       use: { ...devices['Desktop Chrome'] },
     },
+
+    // ── Technician ─────────────────────────────────────────────────────────────
+
+    {
+      name: 'technician-setup',
+      testDir: './tests/technician',
+      testMatch: /auth\.setup\.ts/,
+    },
+    {
+      name: 'technician',
+      testDir: './tests/technician',
+      testIgnore: /auth\.setup\.ts|login\.negative\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'playwright/.auth/technician.json',
+      },
+      dependencies: ['technician-setup'],
+    },
+    {
+      name: 'technician-login',
+      testDir: './tests/technician',
+      testMatch: /login\.negative\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'] },
+    },
   ],
 
   reporter: process.env.CI

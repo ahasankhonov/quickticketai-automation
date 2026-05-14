@@ -1,0 +1,18 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "https://dev.quickticketai.com",
+      "localStorage": [
+        {
+          "name": "authToken",
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQyMDc0Y2JjLWQwN2YtNDk2ZC1iMjk5LWE2N2RhMTg2NDYxYSIsInJvbGUiOiJURUNITklDSUFOIiwiaWF0IjoxNzc4NzUwMTMzLCJleHAiOjE3Nzg4MzY1MzN9.czKoQcZ7A8T8r02qR6bttE_0CwD_88W89g03B83iogw"
+        },
+        {
+          "name": "refreshToken",
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQyMDc0Y2JjLWQwN2YtNDk2ZC1iMjk5LWE2N2RhMTg2NDYxYSIsInJvbGUiOiJURUNITklDSUFOIiwiaWF0IjoxNzc4NzUwMTMzLCJleHAiOjE3ODEzNDIxMzN9.-Ejq3zONCnYzUgjLK8gDStDfN6htPdr0Ppyc-3sxFSs"
+        }
+      ]
+    }
+  ]
+}
