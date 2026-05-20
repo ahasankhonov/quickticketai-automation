@@ -1,0 +1,51 @@
+name: E2E — Full Flow
+
+on:
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  full-flow-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Full E2E Flow Suite
+        run: npx playwright test --project=full-flow --workers=2 --reporter=json,html
+        env:
+          CI: true
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results.json
+
+      - name: Upload Full-Flow Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results-full-flow
+          path: |
+            results.json
+            test-results/
+          retention-days: 30
+
+      - name: Upload Full-Flow HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-full-flow
+          path: playwright-report/
+          retention-days: 30

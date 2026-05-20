@@ -89,6 +89,21 @@ export default defineConfig({
       testMatch: /login\.negative\.spec\.ts/,
       use: { ...devices['Desktop Chrome'] },
     },
+
+    // ── Full E2E Flows ─────────────────────────────────────────────────────────
+    // Cross-page, cross-role business workflow tests.
+    // Run independently via: npm run test:e2e  or  --project=full-flow
+    // Depends on all three role auth setups so every context is pre-authenticated.
+
+    {
+      name: 'full-flow',
+      testDir: './tests/e2e',
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'playwright/.auth/admin.json',
+      },
+      dependencies: ['admin-setup', 'manager-setup', 'technician-setup'],
+    },
   ],
 
   reporter: process.env.CI

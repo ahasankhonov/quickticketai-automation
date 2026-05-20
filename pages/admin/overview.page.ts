@@ -12,7 +12,7 @@ export class AdminOverviewPage extends BasePage {
 
   async verifyOverviewLoaded() {
     await expect(this.page).toHaveURL(/\/dashboard\/overview/);
-    await expect(this.page.getByRole('tab', { name: 'Overview' })).toBeVisible();
+    await expect(this.page.getByRole('tab', { name: /^Overview$|^Resumen$/i })).toBeVisible();
   }
 
   async switchTab(tabName: Tab) {

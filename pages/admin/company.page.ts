@@ -48,6 +48,8 @@ export class AdminCompanyPage extends BasePage {
 
   async goto() {
     await this.page.goto('/dashboard/company-info');
+    await this.page.waitForURL(/\/dashboard\/company/, { timeout: 15000 }).catch(() => {});
+    await this.page.getByRole('tab').first().waitFor({ state: 'visible', timeout: 15000 }).catch(() => {});
   }
 
   async verifyLoaded() {

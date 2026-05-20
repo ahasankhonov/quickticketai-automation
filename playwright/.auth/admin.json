@@ -6,11 +6,15 @@
       "localStorage": [
         {
           "name": "authToken",
-          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxZDM3OTA1LWUzNzEtNGNlNy1hMjk3LWNiNWJmMzZhYTI0MyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3ODY1MDI5NywiZXhwIjoxNzc4NzM2Njk3fQ.GrCNvHYfCxZYnd9zpcIGMyFkDZaZGd8jMQj0o6TvslY"
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxZDM3OTA1LWUzNzEtNGNlNy1hMjk3LWNiNWJmMzZhYTI0MyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3OTA4MTMzMCwiZXhwIjoxNzc5MTY3NzMwfQ.IBRqAxqe3IfQe2_xHkaJyuZuOcSrcKksIJZUCXKvu28"
         },
         {
           "name": "refreshToken",
-          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxZDM3OTA1LWUzNzEtNGNlNy1hMjk3LWNiNWJmMzZhYTI0MyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3ODY1MDI5NywiZXhwIjoxNzgxMjQyMjk3fQ.HQQtuObQhAG57BHcaaWyDSJsnpufvZgjzdzcufzH8So"
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxZDM3OTA1LWUzNzEtNGNlNy1hMjk3LWNiNWJmMzZhYTI0MyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3OTA4MTMzMCwiZXhwIjoxNzgxNjczMzMwfQ.SA4Mb2kTumnUHexWciFde9kgd0WsiLo7t-NPWun6pR0"
+        },
+        {
+          "name": "auth",
+          "value": "{\"state\":{\"user\":{\"role\":\"TECHNICIAN\"},\"token\":null},\"version\":0}"
         }
       ]
     }

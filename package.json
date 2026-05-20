@@ -7,6 +7,8 @@
     "test:admin": "playwright test --project=admin --project=admin-login",
     "test:manager": "playwright test --project=manager --project=manager-login",
     "test:technician": "playwright test --project=technician --project=technician-login",
+    "test:e2e": "playwright test --project=full-flow --workers=2",
+    "test:e2e:headed": "playwright test --project=full-flow --workers=1 --headed",
     "test:headed": "playwright test --headed",
     "test:ci": "CI=true playwright test",
     "test:debug": "playwright test --headed --workers=1",
