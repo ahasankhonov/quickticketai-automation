@@ -34,6 +34,8 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-chromium-${{ steps.playwright-version.outputs.version }}
+          restore-keys: |
+            playwright-${{ runner.os }}-chromium-
 
       - name: Install Playwright browsers (cache miss)
         if: steps.playwright-cache.outputs.cache-hit != 'true'
