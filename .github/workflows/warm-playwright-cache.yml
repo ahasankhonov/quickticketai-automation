@@ -42,7 +42,13 @@ jobs:
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
+        run: |
+          for i in 1 2 3; do
+            npx playwright install --with-deps chromium && break
+            echo "Attempt $i failed, retrying..."
+            sleep 10
+          done
+        timeout-minutes: 15
 
       - name: Cache status
         run: |
