@@ -54,7 +54,7 @@ test.describe.serial('Technician — Job Tickets — Negative & Edge Cases', () 
     await jobTicketsPage.verifyLoaded();
   });
 
-  test('should open row menu on first ticket and show Edit and Delete options', async () => {
+  test('should open row menu and show only Edit option (technician has no Delete)', async () => {
     const dataRows = page.getByRole('row').filter({ hasNot: page.getByRole('columnheader') });
     const count = await dataRows.count();
     if (count === 0) {

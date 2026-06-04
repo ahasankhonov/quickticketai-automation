@@ -25,11 +25,11 @@ export class AdminProjectsPage extends BasePage {
     if (lang === 'en') {
       await expect(this.page.getByText('Total Projects')).toBeVisible();
       await expect(this.page.getByText('Draft Projects')).toBeVisible();
-      await expect(this.page.getByText('Submitted Projects')).toBeVisible();
+      await expect(this.page.getByText('Total Job Tickets assigned to Projects')).toBeVisible();
     } else {
       await expect(this.page.getByText('Proyectos Totales')).toBeVisible();
       await expect(this.page.getByText('Proyectos Borrador')).toBeVisible();
-      await expect(this.page.getByText('Proyectos Enviados')).toBeVisible();
+      await expect(this.page.getByText('Total de Job Tickets asignados a Proyectos')).toBeVisible();
     }
   }
 
@@ -38,6 +38,9 @@ export class AdminProjectsPage extends BasePage {
     await expect(this.page.getByRole('columnheader', { name: /Project name|Nombre del proyecto/i })).toBeVisible();
     await expect(this.page.getByRole('columnheader', { name: /Created On|Creado el/i })).toBeVisible();
     await expect(this.page.getByRole('columnheader', { name: /Created By|Creado por/i })).toBeVisible();
+    await expect(this.page.getByRole('columnheader', { name: /Customer Company|Compañía cliente/i })).toBeVisible();
+    await expect(this.page.getByRole('columnheader', { name: /Total Job Tickets|Total de Job Tickets/i })).toBeVisible();
+    await expect(this.page.getByRole('columnheader', { name: /Total Invoices|Total de facturas/i })).toBeVisible();
   }
 
   async switchView(view: View) {
@@ -75,7 +78,9 @@ export class AdminProjectsPage extends BasePage {
   async deleteProject(rowIndex: number, confirm: boolean) {
     const rows = this.page.getByRole('row').filter({ hasNot: this.page.getByRole('columnheader') });
     await rows.nth(rowIndex).getByRole('button').last().click();
-    await this.page.getByRole('menuitem', { name: /delete|eliminar/i }).click();
+    const deleteItem = this.page.getByRole('menuitem', { name: /delete|eliminar/i });
+    await deleteItem.waitFor({ state: 'visible', timeout: 5000 });
+    await deleteItem.dispatchEvent('click');
     if (confirm) {
       await this.page.getByRole('button', { name: /confirm|yes|delete|eliminar|sí/i }).last().click();
     } else {
